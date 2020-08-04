@@ -7,6 +7,7 @@ class NewTrie {
     private int n;
     private int targetWidth;
     private TrieNode root;
+    private int size;
 
     private class TrieNode {
         private TrieNode[] children = null;
@@ -92,6 +93,7 @@ class NewTrie {
             node.SSets = Arrays.copyOf(node.SSets, node.SSets.length + 1);
             node.SSets[node.SSets.length - 1] = SSet;
         }
+        ++size;
     }
 
     void put(XBitSet SSet, int neighborSize, XBitSet NSet) {
@@ -114,9 +116,6 @@ class NewTrie {
     }
 
     int[] getSizes() {
-        // a dummy implementation
-        int sizes[] = new int[1];
-        sizes[0] = -1;
-        return sizes;
+        return new int[] {size};
     }
 }
