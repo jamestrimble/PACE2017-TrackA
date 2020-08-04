@@ -22,18 +22,6 @@ class NewTrie {
             subtrieIntersectionOfNds.set(0, n);
         }
 
-        private TrieNode addChildNode(int key, int n) {
-            TrieNode node = new TrieNode(key, n);
-            if (children == null) {
-                children = new TrieNode[1];
-                children[0] = node;
-            } else {
-                children = Arrays.copyOf(children, children.length + 1);
-                children[children.length - 1] = node;
-            }
-            return node;
-        }
-
         TrieNode getOrAddChildNode(int key, int n) {
             if (children != null) {
                 for (TrieNode child : children) {
@@ -42,10 +30,18 @@ class NewTrie {
                     }
                 }
             }
-            return addChildNode(key, n);
+            // Node not found; add and return it
+            TrieNode node = new TrieNode(key, n);
+            if (children == null) {
+                children = new TrieNode[] {node};
+            } else {
+                children = Arrays.copyOf(children, children.length + 1);
+                children[children.length - 1] = node;
+            }
+            return node;
         }
 
-        private void getAllAlmostSubsetsHelper(
+        private void query(
                 XBitSet vertices,
                 XBitSet nd,
                 int maxNdUnionSize,
@@ -70,13 +66,10 @@ class NewTrie {
             }
             if (children != null) {
                 for (TrieNode child : children) {
-                    int newNdUnionSize = ndUnionSize;
-                    if (!nd.get(child.key)) {
-                        ++newNdUnionSize;
-                    }
+                    int newNdUnionSize = nd.get(child.key) ? ndUnionSize : ndUnionSize + 1;
                     if (newNdUnionSize <= maxNdUnionSize) {
                         nbs.set(child.key);
-                        child.getAllAlmostSubsetsHelper(vertices, nd, maxNdUnionSize, newNdUnionSize, nbs, out_list);
+                        child.query(vertices, nd, maxNdUnionSize, newNdUnionSize, nbs, out_list);
                         nbs.clear(child.key);
                     }
                 }
@@ -101,8 +94,7 @@ class NewTrie {
             node.subtrieUnionOfSets.or(vertices);
         }
         if (node.vals == null) {
-            node.vals = new XBitSet[1];
-            node.vals[0] = vertices;
+            node.vals = new XBitSet[] {vertices};
         } else {
             node.vals = Arrays.copyOf(node.vals, node.vals.length + 1);
             node.vals[node.vals.length - 1] = vertices;
@@ -116,18 +108,14 @@ class NewTrie {
     // for debugging
     void showList(ArrayList<XBitSet> bitsets) {
         for (XBitSet bs : bitsets) {
-            for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
-                System.out.print(i + " ");
-            }
-            System.out.println();
+            System.out.println(bs);
         }
-        System.out.println("--------------");
     }
 
     void collectSuperblocks(XBitSet component, XBitSet neighbours,
             ArrayList<XBitSet> list) {
         XBitSet nbs = new XBitSet(n);
-        root.getAllAlmostSubsetsHelper(component, neighbours, targetWidth + 1, neighbours.cardinality(), nbs, list);
+        root.query(component, neighbours, targetWidth + 1, neighbours.cardinality(), nbs, list);
     }
 
     int[] getSizes() {
