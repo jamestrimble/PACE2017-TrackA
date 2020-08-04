@@ -9,20 +9,12 @@ class NewTrie {
     private TrieNode root;
 
     private class TrieNode {
-        private TrieNode[] successors = null;
+        private TrieNode[] children = null;
         private XBitSet subtrieUnionOfSets;
         private XBitSet subtrieIntersectionOfNds;
         private int key;
         private XBitSet[] vals = null;
         private XBitSet nbs = null;
-
-        private int numValsInSubtrie;
-
-        // As an optimisation, we store one (S, N(S)) pair that appears in this
-        // subtrie.  If numValsInSubtrie==1, we can use this pair and avoid
-        // recursing further at query time.
-        private XBitSet verticesInSubTrie;
-        private XBitSet nbsInSubTrie;
 
         TrieNode(int key, int n) {
             this.key = key;
@@ -31,37 +23,27 @@ class NewTrie {
             subtrieIntersectionOfNds.set(0, n);
         }
 
-        private TrieNode addSuccessorNode(int key, int n) {
+        private TrieNode addChildNode(int key, int n) {
             TrieNode node = new TrieNode(key, n);
-            if (successors == null) {
-                successors = new TrieNode[1];
-                successors[0] = node;
+            if (children == null) {
+                children = new TrieNode[1];
+                children[0] = node;
             } else {
-                successors = Arrays.copyOf(successors, successors.length + 1);
-                successors[successors.length - 1] = node;
+                children = Arrays.copyOf(children, children.length + 1);
+                children[children.length - 1] = node;
             }
             return node;
         }
 
-        TrieNode getOrAddSuccessorNode(int key, int n) {
-            if (successors != null) {
-                for (TrieNode succ : successors) {
-                    if (succ.key == key) {
-                        return succ;
+        TrieNode getOrAddChildNode(int key, int n) {
+            if (children != null) {
+                for (TrieNode child : children) {
+                    if (child.key == key) {
+                        return child;
                     }
                 }
             }
-            return addSuccessorNode(key, n);
-        }
-
-        private void recordSetInSubtrie(XBitSet vertices, XBitSet neighbours) {
-            subtrieIntersectionOfNds.and(neighbours);
-            subtrieUnionOfSets.or(vertices);
-            ++numValsInSubtrie;
-            if (numValsInSubtrie == 1) {
-                verticesInSubTrie = vertices;
-                nbsInSubTrie = neighbours;
-            }
+            return addChildNode(key, n);
         }
 
         private void getAllAlmostSubsetsHelper(
@@ -76,13 +58,6 @@ class NewTrie {
             if (!vertices.isSubset(subtrieUnionOfSets)) {
                 return;
             }
-            if (numValsInSubtrie == 1) {
-                if (nd.unionWith(nbsInSubTrie).cardinality() <= maxNdUnionSize &&
-                        vertices.isSubset(verticesInSubTrie)) {
-                    out_list.add(nbsInSubTrie);
-                }
-                return;
-            }
             if (vals != null) {
                 if (nd.unionWith(nbs).cardinality() <= maxNdUnionSize) {
                     for (XBitSet val : vals) {
@@ -93,14 +68,14 @@ class NewTrie {
                     }
                 }
             }
-            if (successors != null) {
-                for (TrieNode succ : successors) {
+            if (children != null) {
+                for (TrieNode child : children) {
                     int newNumExtrasPermitted = numExtrasPermitted;
-                    if (!nd.get(succ.key)) {
+                    if (!nd.get(child.key)) {
                         --newNumExtrasPermitted;
                     }
                     if (newNumExtrasPermitted >= 0) {
-                        succ.getAllAlmostSubsetsHelper(vertices, nd, maxNdUnionSize, newNumExtrasPermitted, out_list);
+                        child.getAllAlmostSubsetsHelper(vertices, nd, maxNdUnionSize, newNumExtrasPermitted, out_list);
                     }
                 }
             }
@@ -114,12 +89,14 @@ class NewTrie {
     }
 
     void put(XBitSet vertices, XBitSet neighbours) {
-        root.recordSetInSubtrie(vertices, neighbours);
+        root.subtrieIntersectionOfNds.and(neighbours);
+        root.subtrieUnionOfSets.or(vertices);
         TrieNode node = root;
         // iterate over elements of neighbours
         for (int i = neighbours.nextSetBit(0); i >= 0; i = neighbours.nextSetBit(i+1)) {
-            node = node.getOrAddSuccessorNode(i, n);
-            node.recordSetInSubtrie(vertices, neighbours);
+            node = node.getOrAddChildNode(i, n);
+            node.subtrieIntersectionOfNds.and(neighbours);
+            node.subtrieUnionOfSets.or(vertices);
         }
         if (node.vals == null) {
             node.vals = new XBitSet[1];
