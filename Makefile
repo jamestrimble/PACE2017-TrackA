@@ -1,10 +1,10 @@
 all:	exact heuristic
 
 exact:
-	javac tw/exact/*.java
+	javac -d "bin" tw/exact/*.java
 
 heuristic:
-	javac tw/heuristic/*.java
+	javac -d "bin" tw/heuristic/*.java
 
 clean: 
-	rm tw/*/*.class
+	rm -f bin/tw/*/*.class tw/*/*.class

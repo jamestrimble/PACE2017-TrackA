@@ -16,7 +16,7 @@ do
   esac
 done
 
-java $JFLAGS tw.heuristic.MainDecomposer -s $seed < $tmp &
+java $JFLAGS -cp "bin" tw.heuristic.MainDecomposer -s $seed < $tmp &
 
 PID=$!
 trap 'kill -SIGTERM $PID' SIGTERM
