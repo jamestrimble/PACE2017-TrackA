@@ -14,7 +14,6 @@ class NewTrie {
         private XBitSet subtrieIntersectionOfNds;
         private int key;
         private XBitSet[] vals = null;
-        private XBitSet nbs = null;
 
         TrieNode(int key, int n) {
             this.key = key;
@@ -51,6 +50,7 @@ class NewTrie {
                 XBitSet nd,
                 int maxNdUnionSize,
                 int ndUnionSize,
+                XBitSet nbs,
                 ArrayList<XBitSet> out_list) {
             if (nd.unionWith(subtrieIntersectionOfNds).cardinality() > maxNdUnionSize) {
                 return;
@@ -62,7 +62,7 @@ class NewTrie {
                 if (ndUnionSize <= maxNdUnionSize) {
                     for (XBitSet val : vals) {
                         if (vertices.isSubset(val)) {
-                            out_list.add(nbs);
+                            out_list.add((XBitSet) nbs.clone());
                             break;
                         }
                     }
@@ -75,7 +75,9 @@ class NewTrie {
                         ++newNdUnionSize;
                     }
                     if (newNdUnionSize <= maxNdUnionSize) {
-                        child.getAllAlmostSubsetsHelper(vertices, nd, maxNdUnionSize, newNdUnionSize, out_list);
+                        nbs.set(child.key);
+                        child.getAllAlmostSubsetsHelper(vertices, nd, maxNdUnionSize, newNdUnionSize, nbs, out_list);
+                        nbs.clear(child.key);
                     }
                 }
             }
@@ -101,7 +103,6 @@ class NewTrie {
         if (node.vals == null) {
             node.vals = new XBitSet[1];
             node.vals[0] = vertices;
-            node.nbs = neighbours;
         } else {
             node.vals = Arrays.copyOf(node.vals, node.vals.length + 1);
             node.vals[node.vals.length - 1] = vertices;
@@ -125,7 +126,8 @@ class NewTrie {
 
     void collectSuperblocks(XBitSet component, XBitSet neighbours,
             ArrayList<XBitSet> list) {
-        root.getAllAlmostSubsetsHelper(component, neighbours, targetWidth + 1, neighbours.cardinality(), list);
+        XBitSet nbs = new XBitSet(n);
+        root.getAllAlmostSubsetsHelper(component, neighbours, targetWidth + 1, neighbours.cardinality(), nbs, list);
     }
 
     int[] getSizes() {
