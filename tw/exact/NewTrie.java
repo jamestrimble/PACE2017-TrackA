@@ -69,6 +69,40 @@ class NewTrie {
                 }
             }
         }
+
+        private void printLatex(ArrayList<Integer> currentNodeN) {
+            System.out.print("[{$");
+            if (currentNodeN.isEmpty()) {
+                System.out.print("\\emptyset");
+            } else {
+                String comma = "";
+                for (int v : currentNodeN) {
+                    System.out.print(comma + v);
+                    comma = " ";
+                }
+            }
+            System.out.print("$ ");
+            if (SSets != null) {
+                for (XBitSet SSet : SSets) {
+                    System.out.print("\\\\ [-1ex] \\scriptsize {\\color{gray} $");
+                    String comma = "";
+                    for (int v = SSet.nextSetBit(0); v >= 0; v = SSet.nextSetBit(v+1)) {
+                        System.out.print(comma + v);
+                        comma = " ";
+                    }
+                    System.out.print("$} ");
+                }
+            }
+            System.out.print("},align=center");
+            if (children != null) {
+                for (TrieNode child : children) {
+                    currentNodeN.add(child.key);
+                    child.printLatex(currentNodeN);
+                    currentNodeN.remove(currentNodeN.size() - 1);
+                }
+            }
+            System.out.print("]");
+        }
     }
 
     NewTrie(int n, int targetWidth) {
@@ -117,5 +151,17 @@ class NewTrie {
 
     int[] getSizes() {
         return new int[] {size};
+    }
+
+    void printLatex() {
+        System.out.println("\\documentclass{standalone}");
+        System.out.println("\\usepackage{forest}");
+        System.out.println("\\forestset{  default preamble={  for tree={draw,rounded corners}  }}");
+        System.out.println("\\begin{document}");
+        System.out.println("\\begin{forest}");
+        root.printLatex(new ArrayList<Integer>());
+        System.out.println();
+        System.out.println("\\end{forest}");
+        System.out.println("\\end{document}");
     }
 }
