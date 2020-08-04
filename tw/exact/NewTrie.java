@@ -70,30 +70,48 @@ class NewTrie {
             }
         }
 
+        private void printLatexBitset(XBitSet bitset, String colour) {
+            System.out.print("\\\\ [-1ex] \\scriptsize {\\color{" + colour + "} $");
+            if (bitset.isEmpty()) {
+                System.out.print("\\emptyset");
+            } else {
+                String comma = "";
+                for (int v = bitset.nextSetBit(0); v >= 0; v = bitset.nextSetBit(v+1)) {
+                    System.out.print(comma + v);
+                    comma = " ";
+                }
+            }
+            System.out.print("$} ");
+        }
+
         private void printLatex(ArrayList<Integer> currentNodeN) {
             System.out.print("[{$");
             if (currentNodeN.isEmpty()) {
                 System.out.print("\\emptyset");
             } else {
-                String comma = "";
                 for (int v : currentNodeN) {
-                    System.out.print(comma + v);
-                    comma = " ";
+                    if (v == currentNodeN.get(currentNodeN.size() - 1)) {
+                        System.out.print("\\mathbf{" + v + "}");
+                    } else {
+                        System.out.print(v);
+                    }
                 }
             }
             System.out.print("$ ");
+
+            printLatexBitset(subtrieIntersectionOfNSets, "black!50");
+
+            printLatexBitset(subtrieUnionOfSSets, "blue");
+
             if (SSets != null) {
                 for (XBitSet SSet : SSets) {
-                    System.out.print("\\\\ [-1ex] \\scriptsize {\\color{gray} $");
-                    String comma = "";
-                    for (int v = SSet.nextSetBit(0); v >= 0; v = SSet.nextSetBit(v+1)) {
-                        System.out.print(comma + v);
-                        comma = " ";
-                    }
-                    System.out.print("$} ");
+                    printLatexBitset(SSet, "blue!50");
                 }
             }
             System.out.print("},align=center");
+            if (SSets != null) {
+                System.out.print(",line width=.7mm");
+            }
             if (children != null) {
                 for (TrieNode child : children) {
                     currentNodeN.add(child.key);
