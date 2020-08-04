@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 
 class NewTrieToLatex {
     public static void main(String[] args) throws IOException {
+        int featureFlags = Integer.parseInt(args[0]);
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int n = Integer.parseInt(br.readLine());
         int targetWidth = Integer.parseInt(br.readLine());
@@ -26,6 +27,6 @@ class NewTrieToLatex {
             trie.put(setS, setN);
         }
         br.close();
-        trie.printLatex();
+        trie.printLatex(featureFlags);
     }
 }

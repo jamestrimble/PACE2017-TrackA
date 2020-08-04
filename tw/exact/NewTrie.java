@@ -84,7 +84,7 @@ class NewTrie {
             System.out.print("$} ");
         }
 
-        private void printLatex(ArrayList<Integer> currentNodeN) {
+        private void printLatex(ArrayList<Integer> currentNodeN, int featureFlags) {
             System.out.print("[{$");
             if (currentNodeN.isEmpty()) {
                 System.out.print("\\emptyset");
@@ -99,13 +99,19 @@ class NewTrie {
             }
             System.out.print("$ ");
 
-            printLatexBitset(subtrieIntersectionOfNSets, "black!50");
+            if (0 != (featureFlags & 1)) {
+                printLatexBitset(subtrieIntersectionOfNSets, "black!50");
+            }
 
-            printLatexBitset(subtrieUnionOfSSets, "blue");
+            if (0 != (featureFlags & 2)) {
+                printLatexBitset(subtrieUnionOfSSets, "blue");
+            }
 
-            if (SSets != null) {
-                for (XBitSet SSet : SSets) {
-                    printLatexBitset(SSet, "blue!50");
+            if (0 != (featureFlags & 4)) {
+                if (SSets != null) {
+                    for (XBitSet SSet : SSets) {
+                        printLatexBitset(SSet, "blue!50");
+                    }
                 }
             }
             System.out.print("},align=center");
@@ -115,7 +121,7 @@ class NewTrie {
             if (children != null) {
                 for (TrieNode child : children) {
                     currentNodeN.add(child.key);
-                    child.printLatex(currentNodeN);
+                    child.printLatex(currentNodeN, featureFlags);
                     currentNodeN.remove(currentNodeN.size() - 1);
                 }
             }
@@ -171,13 +177,13 @@ class NewTrie {
         return new int[] {size};
     }
 
-    void printLatex() {
+    void printLatex(int featureFlags) {
         System.out.println("\\documentclass{standalone}");
         System.out.println("\\usepackage{forest}");
         System.out.println("\\forestset{  default preamble={  for tree={draw,rounded corners}  }}");
         System.out.println("\\begin{document}");
         System.out.println("\\begin{forest}");
-        root.printLatex(new ArrayList<Integer>());
+        root.printLatex(new ArrayList<Integer>(), featureFlags);
         System.out.println();
         System.out.println("\\end{forest}");
         System.out.println("\\end{document}");
