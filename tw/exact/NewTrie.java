@@ -50,7 +50,7 @@ class NewTrie {
                 XBitSet vertices,
                 XBitSet nd,
                 int maxNdUnionSize,
-                int numExtrasPermitted,
+                int ndUnionSize,
                 ArrayList<XBitSet> out_list) {
             if (nd.unionWith(subtrieIntersectionOfNds).cardinality() > maxNdUnionSize) {
                 return;
@@ -59,7 +59,7 @@ class NewTrie {
                 return;
             }
             if (vals != null) {
-                if (nd.unionWith(nbs).cardinality() <= maxNdUnionSize) {
+                if (ndUnionSize <= maxNdUnionSize) {
                     for (XBitSet val : vals) {
                         if (vertices.isSubset(val)) {
                             out_list.add(nbs);
@@ -70,12 +70,12 @@ class NewTrie {
             }
             if (children != null) {
                 for (TrieNode child : children) {
-                    int newNumExtrasPermitted = numExtrasPermitted;
+                    int newNdUnionSize = ndUnionSize;
                     if (!nd.get(child.key)) {
-                        --newNumExtrasPermitted;
+                        ++newNdUnionSize;
                     }
-                    if (newNumExtrasPermitted >= 0) {
-                        child.getAllAlmostSubsetsHelper(vertices, nd, maxNdUnionSize, newNumExtrasPermitted, out_list);
+                    if (newNdUnionSize <= maxNdUnionSize) {
+                        child.getAllAlmostSubsetsHelper(vertices, nd, maxNdUnionSize, newNdUnionSize, out_list);
                     }
                 }
             }
@@ -125,7 +125,7 @@ class NewTrie {
 
     void collectSuperblocks(XBitSet component, XBitSet neighbours,
             ArrayList<XBitSet> list) {
-        root.getAllAlmostSubsetsHelper(component, neighbours, targetWidth + 1, targetWidth + 1 - neighbours.cardinality(), list);
+        root.getAllAlmostSubsetsHelper(component, neighbours, targetWidth + 1, neighbours.cardinality(), list);
     }
 
     int[] getSizes() {
