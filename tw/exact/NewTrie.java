@@ -10,16 +10,16 @@ class NewTrie {
 
     private class TrieNode {
         private TrieNode[] children = null;
-        private XBitSet subtrieUnionOfSets;
-        private XBitSet subtrieIntersectionOfNds;
+        private XBitSet subtrieUnionOfSSets;
+        private XBitSet subtrieIntersectionOfNSets;
         private int key;
-        private XBitSet[] vals = null;
+        private XBitSet[] SSets = null;
 
         TrieNode(int key, int n) {
             this.key = key;
-            subtrieIntersectionOfNds = new XBitSet(n);
-            subtrieUnionOfSets = new XBitSet(n);
-            subtrieIntersectionOfNds.set(0, n);
+            subtrieIntersectionOfNSets = new XBitSet(n);
+            subtrieUnionOfSSets = new XBitSet(n);
+            subtrieIntersectionOfNSets.set(0, n);
         }
 
         TrieNode getOrAddChildNode(int key, int n) {
@@ -41,24 +41,19 @@ class NewTrie {
             return node;
         }
 
-        private void query(
-                XBitSet vertices,
-                XBitSet nd,
-                int maxNdUnionSize,
-                int ndUnionSize,
-                XBitSet nbs,
-                ArrayList<XBitSet> out_list) {
-            if (nd.unionWith(subtrieIntersectionOfNds).cardinality() > maxNdUnionSize) {
+        private void query(XBitSet queryS, XBitSet queryN, int maxNUnionSize,
+                int nUnionSize, XBitSet currentNodeN, ArrayList<XBitSet> out_list) {
+            if (queryN.unionWith(subtrieIntersectionOfNSets).cardinality() > maxNUnionSize) {
                 return;
             }
-            if (!vertices.isSubset(subtrieUnionOfSets)) {
+            if (!queryS.isSubset(subtrieUnionOfSSets)) {
                 return;
             }
-            if (vals != null) {
-                if (ndUnionSize <= maxNdUnionSize) {
-                    for (XBitSet val : vals) {
-                        if (vertices.isSubset(val)) {
-                            out_list.add((XBitSet) nbs.clone());
+            if (SSets != null) {
+                if (nUnionSize <= maxNUnionSize) {
+                    for (XBitSet SSet : SSets) {
+                        if (queryS.isSubset(SSet)) {
+                            out_list.add((XBitSet) currentNodeN.clone());
                             break;
                         }
                     }
@@ -66,11 +61,11 @@ class NewTrie {
             }
             if (children != null) {
                 for (TrieNode child : children) {
-                    int newNdUnionSize = nd.get(child.key) ? ndUnionSize : ndUnionSize + 1;
-                    if (newNdUnionSize <= maxNdUnionSize) {
-                        nbs.set(child.key);
-                        child.query(vertices, nd, maxNdUnionSize, newNdUnionSize, nbs, out_list);
-                        nbs.clear(child.key);
+                    int newNUnionSize = queryN.get(child.key) ? nUnionSize : nUnionSize + 1;
+                    if (newNUnionSize <= maxNUnionSize) {
+                        currentNodeN.set(child.key);
+                        child.query(queryS, queryN, maxNUnionSize, newNUnionSize, currentNodeN, out_list);
+                        currentNodeN.clear(child.key);
                     }
                 }
             }
@@ -83,26 +78,26 @@ class NewTrie {
         root = new TrieNode(-1, n);
     }
 
-    void put(XBitSet vertices, XBitSet neighbours) {
-        root.subtrieIntersectionOfNds.and(neighbours);
-        root.subtrieUnionOfSets.or(vertices);
+    void put(XBitSet SSet, XBitSet NSet) {
+        root.subtrieIntersectionOfNSets.and(NSet);
+        root.subtrieUnionOfSSets.or(SSet);
         TrieNode node = root;
-        // iterate over elements of neighbours
-        for (int i = neighbours.nextSetBit(0); i >= 0; i = neighbours.nextSetBit(i+1)) {
+        // iterate over elements of NSet
+        for (int i = NSet.nextSetBit(0); i >= 0; i = NSet.nextSetBit(i+1)) {
             node = node.getOrAddChildNode(i, n);
-            node.subtrieIntersectionOfNds.and(neighbours);
-            node.subtrieUnionOfSets.or(vertices);
+            node.subtrieIntersectionOfNSets.and(NSet);
+            node.subtrieUnionOfSSets.or(SSet);
         }
-        if (node.vals == null) {
-            node.vals = new XBitSet[] {vertices};
+        if (node.SSets == null) {
+            node.SSets = new XBitSet[] {SSet};
         } else {
-            node.vals = Arrays.copyOf(node.vals, node.vals.length + 1);
-            node.vals[node.vals.length - 1] = vertices;
+            node.SSets = Arrays.copyOf(node.SSets, node.SSets.length + 1);
+            node.SSets[node.SSets.length - 1] = SSet;
         }
     }
 
-    void put(XBitSet vertices, int neighborSize, XBitSet neighbours) {
-        put(vertices, neighbours);
+    void put(XBitSet SSet, int neighborSize, XBitSet NSet) {
+        put(SSet, NSet);
     }
 
     // for debugging
