@@ -31,7 +31,7 @@ public class IODecomposer {
   
   Bag currentBag;
     
-  LayeredSieve oBlockSieve;
+  NewTrie oBlockSieve;
 
   Queue<IBlock> readyQueue;
 
@@ -95,7 +95,7 @@ public class IODecomposer {
 
       // endorserMap = new HashMap<>();
 
-      oBlockSieve = new LayeredSieve(g.n, targetWidth);
+      oBlockSieve = new NewTrie(g.n, targetWidth);
       oBlockCache = new HashMap<>();
 
       readyQueue = new LinkedList<>();
