@@ -114,7 +114,7 @@ public class NewTrie {
 
         root = new TrieNode(-1, n);
     }
-    
+
     public void put(XBitSet vertices, XBitSet neighbours) {
         root.recordSetInSubtrie(vertices, neighbours);
         TrieNode node = root;
@@ -132,11 +132,11 @@ public class NewTrie {
             node.vals[node.vals.length - 1] = vertices;
         }
     }
-    
+
     public void put(XBitSet vertices, int neighborSize, XBitSet neighbours) {
         put(vertices, neighbours);
     }
-    
+
     // for debugging
     public void showList(ArrayList<XBitSet> bitsets) {
         for (XBitSet bs : bitsets) {
@@ -148,11 +148,11 @@ public class NewTrie {
         System.out.println("--------------");
     }
 
-    public void collectSuperblocks(XBitSet component, XBitSet neighbours, 
+    public void collectSuperblocks(XBitSet component, XBitSet neighbours,
             ArrayList<XBitSet> list) {
         root.getAllAlmostSubsetsHelper(component, neighbours, targetWidth + 1, targetWidth + 1 - neighbours.cardinality(), list);
     }
-    
+
     public int[] getSizes() {
         // a dummy implementation
         int sizes[] = new int[1];
