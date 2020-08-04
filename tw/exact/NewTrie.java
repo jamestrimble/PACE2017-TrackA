@@ -50,12 +50,10 @@ class NewTrie {
                 return;
             }
             if (SSets != null) {
-                if (nUnionSize <= maxNUnionSize) {
-                    for (XBitSet SSet : SSets) {
-                        if (queryS.isSubset(SSet)) {
-                            out_list.add((XBitSet) currentNodeN.clone());
-                            break;
-                        }
+                for (XBitSet SSet : SSets) {
+                    if (queryS.isSubset(SSet)) {
+                        out_list.add((XBitSet) currentNodeN.clone());
+                        break;
                     }
                 }
             }
@@ -110,7 +108,9 @@ class NewTrie {
     void collectSuperblocks(XBitSet component, XBitSet neighbours,
             ArrayList<XBitSet> list) {
         XBitSet nbs = new XBitSet(n);
-        root.query(component, neighbours, targetWidth + 1, neighbours.cardinality(), nbs, list);
+        if (neighbours.cardinality() <= targetWidth + 1) {
+            root.query(component, neighbours, targetWidth + 1, neighbours.cardinality(), nbs, list);
+        }
     }
 
     int[] getSizes() {
