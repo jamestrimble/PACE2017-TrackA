@@ -1,3 +1,0 @@
-#!/bin/sh
-#
-java -Xmx5g -Xms5g -Xss10m -cp "bin" tw.exact.NewTrieToLatex

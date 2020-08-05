@@ -1,0 +1,5 @@
+#!/bin/sh
+#
+java -cp "../bin" tw.exact.NewTrieToLatex 1 < instance-for-viz.txt > viz1.tex && latexmk -pdf viz1
+java -cp "../bin" tw.exact.NewTrieToLatex 7 < instance-for-viz.txt > viz2.tex && latexmk -pdf viz2
+
