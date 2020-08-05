@@ -20,9 +20,8 @@ class NewTrie {
         TrieNode(TrieNode parent, int key, int n) {
             this.parent = parent;
             this.key = key;
-            subtrieIntersectionOfNSets = new XBitSet(n);
-            subtrieUnionOfSSets = new XBitSet(n);
-            subtrieIntersectionOfNSets.set(0, n);
+            subtrieIntersectionOfNSets = null;
+            subtrieUnionOfSSets = new XBitSet();
         }
 
         TrieNode getOrAddChildNode(int key, int n) {
@@ -36,6 +35,14 @@ class NewTrie {
             children = Arrays.copyOf(children, children.length + 1);
             children[children.length - 1] = node;
             return node;
+        }
+
+        private void updateSubtrieIntersectionOfNSets(XBitSet NSet) {
+            if (subtrieIntersectionOfNSets == null) {
+                subtrieIntersectionOfNSets = (XBitSet) NSet.clone();
+            } else {
+                subtrieIntersectionOfNSets.and(NSet);
+            }
         }
 
         private void query(XBitSet queryS, XBitSet queryN, int maxNUnionSize,
@@ -128,13 +135,13 @@ class NewTrie {
     }
 
     void put(XBitSet SSet, XBitSet NSet) {
-        root.subtrieIntersectionOfNSets.and(NSet);
+        root.updateSubtrieIntersectionOfNSets(NSet);
         root.subtrieUnionOfSSets.or(SSet);
         TrieNode node = root;
         // iterate over elements of NSet
         for (int i = NSet.nextSetBit(0); i >= 0; i = NSet.nextSetBit(i+1)) {
             node = node.getOrAddChildNode(i, n);
-            node.subtrieIntersectionOfNSets.and(NSet);
+            node.updateSubtrieIntersectionOfNSets(NSet);
             node.subtrieUnionOfSSets.or(SSet);
         }
         node.SSets = Arrays.copyOf(node.SSets, node.SSets.length + 1);
