@@ -10,11 +10,11 @@ class NewTrie {
     private int size;
 
     private class TrieNode {
-        private TrieNode[] children = null;
+        private TrieNode[] children = new TrieNode[0];
         private XBitSet subtrieUnionOfSSets;
         private XBitSet subtrieIntersectionOfNSets;
         private int key;
-        private XBitSet[] SSets = null;
+        private XBitSet[] SSets = new XBitSet[0];
 
         TrieNode(int key, int n) {
             this.key = key;
@@ -24,21 +24,15 @@ class NewTrie {
         }
 
         TrieNode getOrAddChildNode(int key, int n) {
-            if (children != null) {
-                for (TrieNode child : children) {
-                    if (child.key == key) {
-                        return child;
-                    }
+            for (TrieNode child : children) {
+                if (child.key == key) {
+                    return child;
                 }
             }
             // Node not found; add and return it
             TrieNode node = new TrieNode(key, n);
-            if (children == null) {
-                children = new TrieNode[] {node};
-            } else {
-                children = Arrays.copyOf(children, children.length + 1);
-                children[children.length - 1] = node;
-            }
+            children = Arrays.copyOf(children, children.length + 1);
+            children[children.length - 1] = node;
             return node;
         }
 
@@ -50,22 +44,18 @@ class NewTrie {
             if (!queryS.isSubset(subtrieUnionOfSSets)) {
                 return;
             }
-            if (SSets != null) {
-                for (XBitSet SSet : SSets) {
-                    if (queryS.isSubset(SSet)) {
-                        out_list.add((XBitSet) currentNodeN.clone());
-                        break;
-                    }
+            for (XBitSet SSet : SSets) {
+                if (queryS.isSubset(SSet)) {
+                    out_list.add((XBitSet) currentNodeN.clone());
+                    break;
                 }
             }
-            if (children != null) {
-                for (TrieNode child : children) {
-                    int newNUnionSize = queryN.get(child.key) ? nUnionSize : nUnionSize + 1;
-                    if (newNUnionSize <= maxNUnionSize) {
-                        currentNodeN.set(child.key);
-                        child.query(queryS, queryN, maxNUnionSize, newNUnionSize, currentNodeN, out_list);
-                        currentNodeN.clear(child.key);
-                    }
+            for (TrieNode child : children) {
+                int newNUnionSize = queryN.get(child.key) ? nUnionSize : nUnionSize + 1;
+                if (newNUnionSize <= maxNUnionSize) {
+                    currentNodeN.set(child.key);
+                    child.query(queryS, queryN, maxNUnionSize, newNUnionSize, currentNodeN, out_list);
+                    currentNodeN.clear(child.key);
                 }
             }
         }
@@ -108,22 +98,18 @@ class NewTrie {
             }
 
             if (0 != (featureFlags & 4)) {
-                if (SSets != null) {
-                    for (XBitSet SSet : SSets) {
-                        printLatexBitset(SSet, "blue!50");
-                    }
+                for (XBitSet SSet : SSets) {
+                    printLatexBitset(SSet, "blue!50");
                 }
             }
             System.out.print("},align=center");
-            if (SSets != null) {
+            if (SSets.length > 0) {
                 System.out.print(",line width=.7mm");
             }
-            if (children != null) {
-                for (TrieNode child : children) {
-                    currentNodeN.add(child.key);
-                    child.printLatex(currentNodeN, featureFlags);
-                    currentNodeN.remove(currentNodeN.size() - 1);
-                }
+            for (TrieNode child : children) {
+                currentNodeN.add(child.key);
+                child.printLatex(currentNodeN, featureFlags);
+                currentNodeN.remove(currentNodeN.size() - 1);
             }
             System.out.print("]");
         }
@@ -145,12 +131,8 @@ class NewTrie {
             node.subtrieIntersectionOfNSets.and(NSet);
             node.subtrieUnionOfSSets.or(SSet);
         }
-        if (node.SSets == null) {
-            node.SSets = new XBitSet[] {SSet};
-        } else {
-            node.SSets = Arrays.copyOf(node.SSets, node.SSets.length + 1);
-            node.SSets[node.SSets.length - 1] = SSet;
-        }
+        node.SSets = Arrays.copyOf(node.SSets, node.SSets.length + 1);
+        node.SSets[node.SSets.length - 1] = SSet;
         ++size;
     }
 
