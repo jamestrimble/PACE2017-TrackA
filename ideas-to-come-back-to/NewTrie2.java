@@ -94,15 +94,16 @@ class NewTrie {
             }
             for (XBitSet SSet : SSets) {
                 if (queryS.isSubset(SSet)) {
-                    XBitSet bs = new XBitSet();
-                    TrieNode n = this;
-                    while (n.parent != null) {
-                        for (int k : n.key) {
-                            bs.set(k);
-                        }
-                        n = n.parent;
-                    }
-                    out_list.add(bs);
+//                    XBitSet bs = new XBitSet();
+//                    TrieNode n = this;
+//                    while (n.parent != null) {
+//                        for (int k : n.key) {
+//                            bs.set(k);
+//                        }
+//                        n = n.parent;
+//                    }
+//                    out_list.add(bs);
+                    out_list.add((XBitSet) subtrieIntersectionOfNSets.clone());
                     break;
                 }
             }
