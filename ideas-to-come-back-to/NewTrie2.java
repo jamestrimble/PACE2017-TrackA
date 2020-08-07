@@ -10,13 +10,15 @@ class NewTrie {
     private int size;
 
     private class TrieNode {
+        private TrieNode parent;
         private TrieNode[] children = new TrieNode[0];
         private XBitSet subtrieUnionOfSSets;
         private XBitSet subtrieIntersectionOfNSets = null;
         private int[] key = new int[0];
         private XBitSet[] SSets = new XBitSet[0];
 
-        TrieNode(int[] key, int n) {
+        TrieNode(TrieNode parent, int[] key, int n) {
+            this.parent = parent;
             this.key = key;
             subtrieUnionOfSSets = new XBitSet();
         }
@@ -54,12 +56,13 @@ class NewTrie {
                     int prefixLen = commonPrefixLength(child.key, key);
                     if (prefixLen != 0) {
                         int[] prefix = Arrays.copyOf(key, prefixLen);
-                        TrieNode node = new TrieNode(prefix, n);
+                        TrieNode node = new TrieNode(this, prefix, n);
                         node.updateSubtrieIntersectionOfNSets(
                                 child.subtrieIntersectionOfNSets);
                         node.subtrieUnionOfSSets.or(
                                 child.subtrieUnionOfSSets);
                         node.children = new TrieNode[] {child};
+                        child.parent = node;
                         child.key = Arrays.copyOfRange(child.key, prefixLen, child.key.length);
                         children[i] = node;
                         return node;
@@ -67,7 +70,7 @@ class NewTrie {
                 }
             }
             // Node not found; add and return it
-            TrieNode node = new TrieNode(key, n);
+            TrieNode node = new TrieNode(this, key, n);
             children = Arrays.copyOf(children, children.length + 1);
             children[children.length - 1] = node;
             return node;
@@ -81,36 +84,38 @@ class NewTrie {
             }
         }
 
-        private void query(XBitSet queryS, XBitSet queryN, int maxNUnionSize,
-                int nUnionSize, XBitSet currentNodeN, ArrayList<XBitSet> out_list) {
+        private void query(XBitSet queryS, XBitSet queryN, boolean[] queryNBools, int maxNUnionSize,
+                int nUnionSize, ArrayList<XBitSet> out_list) {
             if (queryN.unionWith(subtrieIntersectionOfNSets).cardinality() > maxNUnionSize) {
                 return;
             }
             if (!queryS.isSubset(subtrieUnionOfSSets)) {
                 return;
             }
-            for (int v : key) {
-                currentNodeN.set(v);
-            }
             for (XBitSet SSet : SSets) {
                 if (queryS.isSubset(SSet)) {
-                    out_list.add((XBitSet) currentNodeN.clone());
+                    XBitSet bs = new XBitSet();
+                    TrieNode n = this;
+                    while (n.parent != null) {
+                        for (int k : n.key) {
+                            bs.set(k);
+                        }
+                        n = n.parent;
+                    }
+                    out_list.add(bs);
                     break;
                 }
             }
             for (TrieNode child : children) {
                 int newNUnionSize = nUnionSize;
                 for (int v : child.key) {
-                    if (!queryN.get(v)) {
+                    if (!queryNBools[v]) {
                         ++newNUnionSize;
                     }
                 }
                 if (newNUnionSize <= maxNUnionSize) {
-                    child.query(queryS, queryN, maxNUnionSize, newNUnionSize, currentNodeN, out_list);
+                    child.query(queryS, queryN, queryNBools, maxNUnionSize, newNUnionSize, out_list);
                 }
-            }
-            for (int v : key) {
-                currentNodeN.clear(v);
             }
         }
 
@@ -176,7 +181,7 @@ class NewTrie {
     NewTrie(int n, int targetWidth) {
         this.n = n;
         this.targetWidth = targetWidth;
-        root = new TrieNode(new int[0], n);
+        root = new TrieNode(null, new int[0], n);
     }
 
     void put(XBitSet SSet, XBitSet NSet) {
@@ -210,9 +215,12 @@ class NewTrie {
 
     void collectSuperblocks(XBitSet component, XBitSet neighbours,
             ArrayList<XBitSet> list) {
-        XBitSet nbs = new XBitSet(n);
         if (neighbours.cardinality() <= targetWidth + 1) {
-            root.query(component, neighbours, targetWidth + 1, neighbours.cardinality(), nbs, list);
+            boolean[] neighboursBools = new boolean[n];
+            for (int i = neighbours.nextSetBit(0); i >= 0; i = neighbours.nextSetBit(i+1)) {
+                neighboursBools[i] = true;
+            }
+            root.query(component, neighbours, neighboursBools, targetWidth + 1, neighbours.cardinality(), list);
         }
     }
 
