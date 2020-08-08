@@ -4,34 +4,31 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 class NewTrie {
-    private int n;
     private int targetWidth;
     private TrieNode root;
     private int size;
 
     private class TrieNode {
-        private TrieNode parent;
         private TrieNode[] children = new TrieNode[0];
         private XBitSet subtrieUnionOfSSets;
         private XBitSet subtrieIntersectionOfNSets;
         private int key;
         private XBitSet[] SSets = new XBitSet[0];
 
-        TrieNode(TrieNode parent, int key, int n) {
-            this.parent = parent;
+        TrieNode(int key) {
             this.key = key;
             subtrieIntersectionOfNSets = null;
             subtrieUnionOfSSets = new XBitSet();
         }
 
-        TrieNode getOrAddChildNode(int key, int n) {
+        TrieNode getOrAddChildNode(int key) {
             for (TrieNode child : children) {
                 if (child.key == key) {
                     return child;
                 }
             }
             // Node not found; add and return it
-            TrieNode node = new TrieNode(this, key, n);
+            TrieNode node = new TrieNode(key);
             children = Arrays.copyOf(children, children.length + 1);
             children[children.length - 1] = node;
             return node;
@@ -55,13 +52,6 @@ class NewTrie {
             }
             for (XBitSet SSet : SSets) {
                 if (queryS.isSubset(SSet)) {
-//                    XBitSet bs = new XBitSet();
-//                    TrieNode n = this;
-//                    while (n.key != -1) {
-//                        bs.set(n.key);
-//                        n = n.parent;
-//                    }
-//                    out_list.add(bs);
                     out_list.add((XBitSet) subtrieIntersectionOfNSets.clone());
                     break;
                 }
@@ -129,10 +119,9 @@ class NewTrie {
         }
     }
 
-    NewTrie(int n, int targetWidth) {
-        this.n = n;
+    NewTrie(int targetWidth) {
         this.targetWidth = targetWidth;
-        root = new TrieNode(null, -1, n);
+        root = new TrieNode(-1);
     }
 
     void put(XBitSet SSet, XBitSet NSet) {
@@ -141,7 +130,7 @@ class NewTrie {
         TrieNode node = root;
         // iterate over elements of NSet
         for (int i = NSet.nextSetBit(0); i >= 0; i = NSet.nextSetBit(i+1)) {
-            node = node.getOrAddChildNode(i, n);
+            node = node.getOrAddChildNode(i);
             node.updateSubtrieIntersectionOfNSets(NSet);
             node.subtrieUnionOfSSets.or(SSet);
         }

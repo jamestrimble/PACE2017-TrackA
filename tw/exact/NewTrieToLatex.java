@@ -10,7 +10,7 @@ class NewTrieToLatex {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int n = Integer.parseInt(br.readLine());
         int targetWidth = Integer.parseInt(br.readLine());
-        NewTrie trie = new NewTrie(n, targetWidth);
+        NewTrie trie = new NewTrie(targetWidth);
         String input;
         while ((input = br.readLine()) != null) {
             String[] sets = input.split(" ");

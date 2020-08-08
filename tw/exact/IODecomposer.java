@@ -95,7 +95,7 @@ public class IODecomposer {
 
       // endorserMap = new HashMap<>();
 
-      oBlockSieve = new NewTrie(g.n, targetWidth);
+      oBlockSieve = new NewTrie(targetWidth);
       oBlockCache = new HashMap<>();
 
       readyQueue = new LinkedList<>();
