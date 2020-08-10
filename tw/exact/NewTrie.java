@@ -15,31 +15,26 @@ class NewTrie implements SupersetDataStructure, LatexPrintable {
         private int key;
         private XBitSet[] SSets = new XBitSet[0];
 
-        TrieNode(int key) {
+        TrieNode(int key, XBitSet initialIntersectionOfNSets) {
             this.key = key;
-            subtrieIntersectionOfNSets = null;
+            subtrieIntersectionOfNSets = initialIntersectionOfNSets;
             subtrieUnionOfSSets = new XBitSet();
         }
 
-        TrieNode getOrAddChildNode(int key) {
+        TrieNode getOrAddChildNode(int key, XBitSet SSet, XBitSet NSet) {
             for (TrieNode child : children) {
                 if (child.key == key) {
+                    child.subtrieIntersectionOfNSets.and(NSet);
+                    child.subtrieUnionOfSSets.or(SSet);
                     return child;
                 }
             }
             // Node not found; add and return it
-            TrieNode node = new TrieNode(key);
+            TrieNode node = new TrieNode(key, (XBitSet) NSet.clone());
+            node.subtrieUnionOfSSets.or(SSet);
             children = Arrays.copyOf(children, children.length + 1);
             children[children.length - 1] = node;
             return node;
-        }
-
-        private void updateSubtrieIntersectionOfNSets(XBitSet NSet) {
-            if (subtrieIntersectionOfNSets == null) {
-                subtrieIntersectionOfNSets = (XBitSet) NSet.clone();
-            } else {
-                subtrieIntersectionOfNSets.and(NSet);
-            }
         }
 
         private void query(XBitSet queryS, XBitSet queryN, int maxNUnionSize,
@@ -119,20 +114,20 @@ class NewTrie implements SupersetDataStructure, LatexPrintable {
         }
     }
 
-    public NewTrie(int targetWidth) {
+    public NewTrie(int n, int targetWidth) {
         this.targetWidth = targetWidth;
-        root = new TrieNode(-1);
+        XBitSet initialIntersectionOfNSets = new XBitSet();
+        initialIntersectionOfNSets.set(0, n);
+        root = new TrieNode(-1, initialIntersectionOfNSets);
     }
 
     public void put(XBitSet SSet, XBitSet NSet) {
-        root.updateSubtrieIntersectionOfNSets(NSet);
+        root.subtrieIntersectionOfNSets.and(NSet);
         root.subtrieUnionOfSSets.or(SSet);
         TrieNode node = root;
         // iterate over elements of NSet
         for (int i = NSet.nextSetBit(0); i >= 0; i = NSet.nextSetBit(i+1)) {
-            node = node.getOrAddChildNode(i);
-            node.updateSubtrieIntersectionOfNSets(NSet);
-            node.subtrieUnionOfSSets.or(SSet);
+            node = node.getOrAddChildNode(i, SSet, NSet);
         }
         node.SSets = Arrays.copyOf(node.SSets, node.SSets.length + 1);
         node.SSets[node.SSets.length - 1] = SSet;

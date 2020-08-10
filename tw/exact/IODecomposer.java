@@ -96,8 +96,8 @@ public class IODecomposer {
       // endorserMap = new HashMap<>();
 
       oBlockSieve = supersetDataStructureType == 0 ? new LayeredSieve(g.n, targetWidth) :
-            supersetDataStructureType == 1 ? new NewTrie(targetWidth) :
-            new NewTrieCompressed(targetWidth);
+            supersetDataStructureType == 1 ? new NewTrie(g.n, targetWidth) :
+            new NewTrieCompressed(g.n, targetWidth);
       oBlockCache = new HashMap<>();
 
       readyQueue = new LinkedList<>();
