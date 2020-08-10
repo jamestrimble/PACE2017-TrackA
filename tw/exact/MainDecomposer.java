@@ -27,7 +27,7 @@ public class MainDecomposer {
 
   private static long time0;
 
-  public static TreeDecomposition decompose(Graph g) {
+  public static TreeDecomposition decompose(Graph g, int supersetDataStructureType) {
     log("decompose n = " + g.n);
     if (g.n == 0) {
       TreeDecomposition td = new TreeDecomposition(0, -1, g);
@@ -38,7 +38,7 @@ public class MainDecomposer {
     
     int nc = components.size();
     if (nc == 1) {
-      return decomposeConnected(g);      
+      return decomposeConnected(g, supersetDataStructureType);
     }
     
     int invs[][] = new int[nc][];
@@ -67,7 +67,7 @@ public class MainDecomposer {
     TreeDecomposition td = new TreeDecomposition(0, 0, g);
     
     for (int i = 0; i < nc; i++) {
-      TreeDecomposition td1 = decomposeConnected(graphs[i]);
+      TreeDecomposition td1 = decomposeConnected(graphs[i], supersetDataStructureType);
       if (td1 == null) {
         return null;
       }
@@ -76,7 +76,7 @@ public class MainDecomposer {
     return td;
   }
   
-  public static TreeDecomposition decomposeConnected(Graph g) {
+  public static TreeDecomposition decomposeConnected(Graph g, int supersetDataStructureType) {
     log("decomposeConnected: n = " + g.n);
 
     if (g.n <= 2) {
@@ -136,7 +136,7 @@ public class MainDecomposer {
       if (bag.getWidth() > lowestPossible) {
         bag.makeRefinable();
         IODecomposer mtd = new IODecomposer(bag, g.minDegree(), g.n - 1);
-        mtd.decompose();
+        mtd.decompose(supersetDataStructureType);
         int w = bag.getWidth();
         if (w > lowestPossible) {
           lowestPossible = w;
@@ -163,8 +163,14 @@ public class MainDecomposer {
   }
 
   public static void main(String[] args) {
+    int supersetDataStructureType = 0;
+    if (args[0] == "new") {
+        supersetDataStructureType = 1;
+    } else if (args[0] == "new2") {
+        supersetDataStructureType = 2;
+    }
     Graph g = Graph.readGraph(System.in);
-    TreeDecomposition td = decompose(g);
+    TreeDecomposition td = decompose(g, supersetDataStructureType);
     td.writeTo(System.out);
   }
 }

@@ -31,7 +31,7 @@ public class IODecomposer {
   
   Bag currentBag;
     
-  NewTrie oBlockSieve;
+  SupersetDataStructure oBlockSieve;
 
   Queue<IBlock> readyQueue;
 
@@ -72,7 +72,7 @@ public class IODecomposer {
     ss = new SafeSeparator(g);
   }
   
-  public void decompose() {
+  public void decompose(int supersetDataStructureType) {
     blockCache = new HashMap<>();
     iBlockCache = new HashMap<>();
 
@@ -95,7 +95,9 @@ public class IODecomposer {
 
       // endorserMap = new HashMap<>();
 
-      oBlockSieve = new NewTrie(targetWidth);
+      oBlockSieve = supersetDataStructureType == 0 ? new LayeredSieve(g.n, targetWidth) :
+            supersetDataStructureType == 1 ? new NewTrie(targetWidth) :
+            new NewTrieCompressed(targetWidth);
       oBlockCache = new HashMap<>();
 
       readyQueue = new LinkedList<>();

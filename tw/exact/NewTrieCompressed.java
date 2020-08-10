@@ -3,32 +3,73 @@ package tw.exact;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-class NewTrie implements SupersetDataStructure, LatexPrintable {
+class NewTrieCompressed implements SupersetDataStructure, LatexPrintable {
     private int targetWidth;
     private TrieNode root;
     private int size;
 
     private class TrieNode {
+        private TrieNode parent;
         private TrieNode[] children = new TrieNode[0];
         private XBitSet subtrieUnionOfSSets;
-        private XBitSet subtrieIntersectionOfNSets;
-        private int key;
+        private XBitSet subtrieIntersectionOfNSets = null;
+        private int[] key = new int[0];
         private XBitSet[] SSets = new XBitSet[0];
 
-        TrieNode(int key) {
+        TrieNode(TrieNode parent, int[] key) {
+            this.parent = parent;
             this.key = key;
-            subtrieIntersectionOfNSets = null;
             subtrieUnionOfSSets = new XBitSet();
         }
 
-        TrieNode getOrAddChildNode(int key) {
-            for (TrieNode child : children) {
-                if (child.key == key) {
+        boolean isPrefix(int[] a, int[] b) {
+            if (a.length > b.length) {
+                return false;
+            }
+            for (int i=0; i<a.length; i++) {
+                if (a[i] != b[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        int commonPrefixLength(int[] a, int[] b) {
+            int minLen = a.length <= b.length ? a.length : b.length;
+            int retval = 0;
+            for (int i=0; i<minLen; i++) {
+                if (a[i] != b[i]) {
+                    return retval;
+                }
+                ++retval;
+            }
+            return retval;
+        }
+
+        TrieNode getOrAddChildNode(int[] key) {
+            for (int i=0; i<children.length; i++) {
+                TrieNode child = children[i];
+                if (isPrefix(child.key, key)) {
                     return child;
+                } else {
+                    int prefixLen = commonPrefixLength(child.key, key);
+                    if (prefixLen != 0) {
+                        int[] prefix = Arrays.copyOf(key, prefixLen);
+                        TrieNode node = new TrieNode(this, prefix);
+                        node.updateSubtrieIntersectionOfNSets(
+                                child.subtrieIntersectionOfNSets);
+                        node.subtrieUnionOfSSets.or(
+                                child.subtrieUnionOfSSets);
+                        node.children = new TrieNode[] {child};
+                        child.parent = node;
+                        child.key = Arrays.copyOfRange(child.key, prefixLen, child.key.length);
+                        children[i] = node;
+                        return node;
+                    }
                 }
             }
             // Node not found; add and return it
-            TrieNode node = new TrieNode(key);
+            TrieNode node = new TrieNode(this, key);
             children = Arrays.copyOf(children, children.length + 1);
             children[children.length - 1] = node;
             return node;
@@ -57,7 +98,12 @@ class NewTrie implements SupersetDataStructure, LatexPrintable {
                 }
             }
             for (TrieNode child : children) {
-                int newNUnionSize = queryN.get(child.key) ? nUnionSize : nUnionSize + 1;
+                int newNUnionSize = nUnionSize;
+                for (int v : child.key) {
+                    if (!queryN.get(v)) {
+                        ++newNUnionSize;
+                    }
+                }
                 if (newNUnionSize <= maxNUnionSize) {
                     child.query(queryS, queryN, maxNUnionSize, newNUnionSize, out_list);
                 }
@@ -111,28 +157,35 @@ class NewTrie implements SupersetDataStructure, LatexPrintable {
                 System.out.print(",line width=.7mm");
             }
             for (TrieNode child : children) {
-                currentNodeN.add(child.key);
+                for (int v : child.key) {
+                    currentNodeN.add(v);
+                }
                 child.printLatex(currentNodeN, featureFlags);
-                currentNodeN.remove(currentNodeN.size() - 1);
+                for (int v : child.key) {
+                    currentNodeN.remove(currentNodeN.size() - 1);
+                }
             }
             System.out.print("]");
         }
     }
 
-    public NewTrie(int targetWidth) {
+    NewTrieCompressed(int targetWidth) {
         this.targetWidth = targetWidth;
-        root = new TrieNode(-1);
+        root = new TrieNode(null, new int[0]);
     }
 
     public void put(XBitSet SSet, XBitSet NSet) {
         root.updateSubtrieIntersectionOfNSets(NSet);
         root.subtrieUnionOfSSets.or(SSet);
         TrieNode node = root;
-        // iterate over elements of NSet
-        for (int i = NSet.nextSetBit(0); i >= 0; i = NSet.nextSetBit(i+1)) {
-            node = node.getOrAddChildNode(i);
+
+        int[] key = NSet.toArray();
+
+        while (key.length != 0) {
+            node = node.getOrAddChildNode(key);
             node.updateSubtrieIntersectionOfNSets(NSet);
             node.subtrieUnionOfSSets.or(SSet);
+            key = Arrays.copyOfRange(key, node.key.length, key.length);
         }
         node.SSets = Arrays.copyOf(node.SSets, node.SSets.length + 1);
         node.SSets[node.SSets.length - 1] = SSet;
