@@ -80,7 +80,7 @@ class NewTrie implements SupersetDataStructure, LatexPrintable {
             } else {
                 for (int v : currentNodeN) {
                     if (v == currentNodeN.get(currentNodeN.size() - 1)) {
-                        System.out.print("\\mathbf{" + v + "}");
+                        System.out.print("\\mathbf{\\underline{" + v + "}}");
                     } else {
                         System.out.print(v);
                     }

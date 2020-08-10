@@ -117,18 +117,19 @@ class NewTrieCompressed implements SupersetDataStructure, LatexPrintable {
             System.out.print("$} ");
         }
 
-        private void printLatex(ArrayList<Integer> currentNodeN, int featureFlags) {
+        private void printLatex(int prevNodeNLength, ArrayList<Integer> currentNodeN, int featureFlags) {
             System.out.print("[{$");
             if (currentNodeN.isEmpty()) {
                 System.out.print("\\emptyset");
             } else {
-                for (int v : currentNodeN) {
-                    if (v == currentNodeN.get(currentNodeN.size() - 1)) {
-                        System.out.print("\\mathbf{" + v + "}");
-                    } else {
-                        System.out.print(v);
+                for (int i=0; i<currentNodeN.size(); i++) {
+                int v = currentNodeN.get(i);
+                    if (i == prevNodeNLength) {
+                        System.out.print("\\mathbf{\\underline{");
                     }
+                    System.out.print(v);
                 }
+                System.out.print("}}");
             }
             System.out.print("$ ");
 
@@ -150,10 +151,11 @@ class NewTrieCompressed implements SupersetDataStructure, LatexPrintable {
                 System.out.print(",line width=.7mm");
             }
             for (TrieNode child : children) {
+                int len = currentNodeN.size();
                 for (int v : child.key) {
                     currentNodeN.add(v);
                 }
-                child.printLatex(currentNodeN, featureFlags);
+                child.printLatex(len, currentNodeN, featureFlags);
                 for (int v : child.key) {
                     currentNodeN.remove(currentNodeN.size() - 1);
                 }
@@ -209,7 +211,7 @@ class NewTrieCompressed implements SupersetDataStructure, LatexPrintable {
         System.out.println("\\forestset{  default preamble={  for tree={draw,rounded corners}  }}");
         System.out.println("\\begin{document}");
         System.out.println("\\begin{forest}");
-        root.printLatex(new ArrayList<Integer>(), featureFlags);
+        root.printLatex(0, new ArrayList<Integer>(), featureFlags);
         System.out.println();
         System.out.println("\\end{forest}");
         System.out.println("\\end{document}");

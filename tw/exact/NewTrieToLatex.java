@@ -6,11 +6,13 @@ import java.io.InputStreamReader;
 
 class NewTrieToLatex {
     public static void main(String[] args) throws IOException {
-        int featureFlags = Integer.parseInt(args[0]);
+        int trieType = Integer.parseInt(args[0]);
+        int featureFlags = Integer.parseInt(args[1]);
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int n = Integer.parseInt(br.readLine());
         int targetWidth = Integer.parseInt(br.readLine());
-        NewTrie trie = new NewTrie(n, targetWidth);
+        LatexPrintable trie = trieType == 1 ? new NewTrie(n, targetWidth) :
+                new NewTrieCompressed(n, targetWidth);
         String input;
         while ((input = br.readLine()) != null) {
             String[] sets = input.split(" ");
