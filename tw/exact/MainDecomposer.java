@@ -164,9 +164,9 @@ public class MainDecomposer {
 
   public static void main(String[] args) {
     int supersetDataStructureType = 0;
-    if (args[0] == "new") {
+    if (args[0].equals("new")) {
         supersetDataStructureType = 1;
-    } else if (args[0] == "new2") {
+    } else if (args[0].equals("new2")) {
         supersetDataStructureType = 2;
     }
     Graph g = Graph.readGraph(System.in);
