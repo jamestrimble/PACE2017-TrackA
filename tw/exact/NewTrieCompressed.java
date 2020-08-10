@@ -21,19 +21,6 @@ class NewTrieCompressed implements SupersetDataStructure, LatexPrintable {
             subtrieUnionOfSSets = new XBitSet();
         }
 
-        // TODO: just use commonPrefixLength
-        boolean isPrefix(int[] a, int[] b) {
-            if (a.length > b.length) {
-                return false;
-            }
-            for (int i=0; i<a.length; i++) {
-                if (a[i] != b[i]) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
         int commonPrefixLength(int[] a, int[] b) {
             int minLen = a.length <= b.length ? a.length : b.length;
             int retval = 0;
@@ -49,23 +36,22 @@ class NewTrieCompressed implements SupersetDataStructure, LatexPrintable {
         TrieNode getOrAddChildNode(int[] key, XBitSet SSet, XBitSet NSet) {
             for (int i=0; i<children.length; i++) {
                 TrieNode child = children[i];
-                if (isPrefix(child.key, key)) {
+                int prefixLen = commonPrefixLength(child.key, key);
+                if (prefixLen == child.key.length) {
+                    // child.key is a prefix of key
                     child.subtrieIntersectionOfNSets.and(NSet);
                     child.subtrieUnionOfSSets.or(SSet);
                     return child;
-                } else {
-                    int prefixLen = commonPrefixLength(child.key, key);
-                    if (prefixLen != 0) {
-                        int[] prefix = Arrays.copyOf(key, prefixLen);
-                        TrieNode node = new TrieNode(prefix, (XBitSet) child.subtrieIntersectionOfNSets.clone());
-                        node.subtrieUnionOfSSets.or(child.subtrieUnionOfSSets);
-                        node.subtrieIntersectionOfNSets.and(NSet);
-                        node.subtrieUnionOfSSets.or(SSet);
-                        node.children = new TrieNode[] {child};
-                        child.key = Arrays.copyOfRange(child.key, prefixLen, child.key.length);
-                        children[i] = node;
-                        return node;
-                    }
+                } else if (prefixLen != 0) {
+                    int[] prefix = Arrays.copyOf(key, prefixLen);
+                    TrieNode node = new TrieNode(prefix, (XBitSet) child.subtrieIntersectionOfNSets.clone());
+                    node.subtrieUnionOfSSets.or(child.subtrieUnionOfSSets);
+                    node.subtrieIntersectionOfNSets.and(NSet);
+                    node.subtrieUnionOfSSets.or(SSet);
+                    node.children = new TrieNode[] {child};
+                    child.key = Arrays.copyOfRange(child.key, prefixLen, child.key.length);
+                    children[i] = node;
+                    return node;
                 }
             }
             // Node not found; add and return it
