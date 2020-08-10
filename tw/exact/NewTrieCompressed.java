@@ -9,15 +9,13 @@ class NewTrieCompressed implements SupersetDataStructure, LatexPrintable {
     private int size;
 
     private class TrieNode {
-        private TrieNode parent;
         private TrieNode[] children = new TrieNode[0];
         private XBitSet subtrieUnionOfSSets;
         private XBitSet subtrieIntersectionOfNSets = null;
         private int[] key = new int[0];
         private XBitSet[] SSets = new XBitSet[0];
 
-        TrieNode(TrieNode parent, int[] key) {
-            this.parent = parent;
+        TrieNode(int[] key) {
             this.key = key;
             subtrieUnionOfSSets = new XBitSet();
         }
@@ -55,13 +53,12 @@ class NewTrieCompressed implements SupersetDataStructure, LatexPrintable {
                     int prefixLen = commonPrefixLength(child.key, key);
                     if (prefixLen != 0) {
                         int[] prefix = Arrays.copyOf(key, prefixLen);
-                        TrieNode node = new TrieNode(this, prefix);
+                        TrieNode node = new TrieNode(prefix);
                         node.updateSubtrieIntersectionOfNSets(
                                 child.subtrieIntersectionOfNSets);
                         node.subtrieUnionOfSSets.or(
                                 child.subtrieUnionOfSSets);
                         node.children = new TrieNode[] {child};
-                        child.parent = node;
                         child.key = Arrays.copyOfRange(child.key, prefixLen, child.key.length);
                         children[i] = node;
                         return node;
@@ -69,7 +66,7 @@ class NewTrieCompressed implements SupersetDataStructure, LatexPrintable {
                 }
             }
             // Node not found; add and return it
-            TrieNode node = new TrieNode(this, key);
+            TrieNode node = new TrieNode(key);
             children = Arrays.copyOf(children, children.length + 1);
             children[children.length - 1] = node;
             return node;
@@ -171,7 +168,7 @@ class NewTrieCompressed implements SupersetDataStructure, LatexPrintable {
 
     NewTrieCompressed(int targetWidth) {
         this.targetWidth = targetWidth;
-        root = new TrieNode(null, new int[0]);
+        root = new TrieNode(new int[0]);
     }
 
     public void put(XBitSet SSet, XBitSet NSet) {
