@@ -1,12 +1,9 @@
 #!/bin/bash
-for n in $(seq 90 10 100); do
-    for p in 5 9; do
-        for i in $(seq 1 10); do
-            echo "---------------------------------------------------"
-            echo $n $p $i
-            time ./tw-exact-new < gr/gr-$n-$p-$i.gr | head -n1
-            time ./tw-exact-new2 < gr/gr-$n-$p-$i.gr | head -n1
-            time ./tw-exact-original < gr/gr-$n-$p-$i.gr | head -n1
-        done
-    done
+for f in $(ls gr); do
+    echo "---------------------------------------------------"
+    echo $f
+    b=$(basename -s '.gr' $f)
+    { time ./tw-exact-new < gr/$f > program-output/$b-n.td ; } 2> runtimes/$b-n.time
+    { time ./tw-exact-new2 < gr/$f > program-output/$b-n2.td ; } 2> runtimes/$b-n2.time
+    { time ./tw-exact-original < gr/$f > program-output/$b-o.td ; } 2> runtimes/$b-o.time
 done
