@@ -1,0 +1,12 @@
+#!/bin/bash
+for n in $(seq 350 50 500); do
+    for p in 9; do
+        for i in $(seq 1 2); do
+            echo "---------------------------------------------------"
+            echo $n $p $i
+            time ./tw-exact-new < extra-gr/gr-$n-$p-$i.gr | head -n1
+            time ./tw-exact-new2 < extra-gr/gr-$n-$p-$i.gr | head -n1
+            time ./tw-exact-original < extra-gr/gr-$n-$p-$i.gr | head -n1
+        done
+    done
+done
