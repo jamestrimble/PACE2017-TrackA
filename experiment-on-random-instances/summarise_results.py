@@ -27,12 +27,12 @@ for name in filenames:
         filename = "runtimes/gr-{}-{}-{}-{}.time".format(n, p, it, program)
         with open(filename, "r") as f:
             lines = [line.strip().split() for line in f.readlines()]
-            print(lines)
+#            print(lines)
             for line in lines:
                 if line and line[0] == "real":
                     results[n][p][program].append(parsetime(line[1]))
 
-print(results)
+#print(results)
 
 rows = []
 for n, ps in sorted(results.items()):

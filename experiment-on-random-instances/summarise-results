@@ -1,0 +1,13 @@
+#!/bin/bash
+
+python summarise_results.py > results/summary.txt
+
+(
+echo "\\begin{tabular}{rrrrr}"
+echo "\\toprule"
+echo "\$n\$ & \$p\$ & PID & PID-N & PID-NC \\\\"
+echo "\\midrule"
+cat results/summary.txt | awk '{print $1, " & " $2, " & " $3, " & " $4, " & " $5 " \\\\"}'
+echo "\\bottomrule"
+echo "\\end{tabular}"
+) > results/random-experiment.tex
