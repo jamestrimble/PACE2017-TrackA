@@ -97,7 +97,9 @@ public class IODecomposer {
 
       oBlockSieve = supersetDataStructureType == 0 ? new LayeredSieve(g.n, targetWidth) :
             supersetDataStructureType == 1 ? new NewTrie(g.n, targetWidth) :
-            new NewTrieCompressed(g.n, targetWidth);
+            supersetDataStructureType == 2 ? new NewTrieCompressed(g.n, targetWidth) :
+            supersetDataStructureType == -1 ? new NewTrieReordered(g.n, targetWidth) :
+            null;
       oBlockCache = new HashMap<>();
 
       readyQueue = new LinkedList<>();
