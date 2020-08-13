@@ -170,6 +170,8 @@ public class MainDecomposer {
         supersetDataStructureType = 2;
     } else if (args[0].equals("new-reordered")) {
         supersetDataStructureType = -1;
+    } else if (args[0].equals("new2-reordered")) {
+        supersetDataStructureType = -2;
     }
     Graph g = Graph.readGraph(System.in);
     TreeDecomposition td = decompose(g, supersetDataStructureType);

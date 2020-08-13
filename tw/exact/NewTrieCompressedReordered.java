@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
-class NewTrieReordered implements SupersetDataStructure, LatexPrintable {
+class NewTrieCompressedReordered implements SupersetDataStructure, LatexPrintable {
     private int targetWidth;
-    private TrieNode root;
+    private TrieNodeCompressed root;
     private int[] stats;
     private ArrayList<BitsetPair> all = new ArrayList<>();
     private FrequencyComparator comparator;
@@ -40,27 +40,33 @@ class NewTrieReordered implements SupersetDataStructure, LatexPrintable {
         }
     }
 
-    public NewTrieReordered(int n, int targetWidth) {
+    NewTrieCompressedReordered(int n, int targetWidth) {
         stats = new int[n];
         comparator = new FrequencyComparator(stats);
         this.targetWidth = targetWidth;
         XBitSet initialIntersectionOfNSets = new XBitSet();
         initialIntersectionOfNSets.set(0, n);
-        root = new TrieNode(-1, initialIntersectionOfNSets);
+        root = new TrieNodeCompressed(new int[0], initialIntersectionOfNSets);
     }
 
     public void put_(XBitSet SSet, XBitSet NSet) {
         root.subtrieIntersectionOfNSets.and(NSet);
         root.subtrieUnionOfSSets.or(SSet);
-        TrieNode node = root;
-        // iterate over elements of NSet
+        TrieNodeCompressed node = root;
+
         ArrayList<Integer> NSetMembersList = new ArrayList<Integer>(NSet.cardinality());
         for (int i = NSet.nextSetBit(0); i >= 0; i = NSet.nextSetBit(i+1)) {
             NSetMembersList.add(i);
         }
         Collections.sort(NSetMembersList, comparator);
-        for (int i : NSetMembersList) {
-            node = node.getOrAddChildNode(i, SSet, NSet);
+        int[] key = new int[NSetMembersList.size()];
+        for (int i=0; i<NSetMembersList.size(); i++) {
+            key[i] = NSetMembersList.get(i);
+        }
+
+        while (key.length != 0) {
+            node = node.getOrAddChildNode(key, SSet, NSet);
+            key = Arrays.copyOfRange(key, node.key.length, key.length);
         }
         node.addSSet(SSet);
     }
@@ -70,7 +76,7 @@ class NewTrieReordered implements SupersetDataStructure, LatexPrintable {
             comparator = new FrequencyComparator(stats);
             XBitSet initialIntersectionOfNSets = new XBitSet();
             initialIntersectionOfNSets.set(0, stats.length);
-            root = new TrieNode(-1, initialIntersectionOfNSets);
+            root = new TrieNodeCompressed(new int[0], initialIntersectionOfNSets);
             for (BitsetPair pair : all) {
                 put_(pair.bs0, pair.bs1);
             }
@@ -107,7 +113,7 @@ class NewTrieReordered implements SupersetDataStructure, LatexPrintable {
         System.out.println("\\forestset{  default preamble={  for tree={draw,rounded corners}  }}");
         System.out.println("\\begin{document}");
         System.out.println("\\begin{forest}");
-        root.printLatex(new ArrayList<Integer>(), featureFlags);
+        root.printLatex(0, new ArrayList<Integer>(), featureFlags);
         System.out.println();
         System.out.println("\\end{forest}");
         System.out.println("\\end{document}");
