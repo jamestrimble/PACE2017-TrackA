@@ -56,9 +56,9 @@ class NewTrieCompressedFurther implements SupersetDataStructure {
             return node;
         }
 
-        private void query(XBitSet queryS, XBitSet queryN, int maxNUnionSize,
-                int nUnionSize, ArrayList<XBitSet> out_list) {
-            if (queryN.unionWith(subtrieIntersectionOfNSets).cardinality() > maxNUnionSize) {
+        private void query(XBitSet queryS, XBitSet queryN, int k,
+                int budget, ArrayList<XBitSet> out_list) {
+            if (subtrieIntersectionOfNSets.subtract(queryN).cardinality() > k) {
                 return;
             }
             if (queryS.intersects(subtrieIntersectionOfNSets)) {
@@ -71,14 +71,14 @@ class NewTrieCompressedFurther implements SupersetDataStructure {
                 }
             }
             for (TrieNode child : children) {
-                int newNUnionSize = nUnionSize;
+                int newBudget = budget;
                 for (int v : child.key) {
                     if (!queryN.get(v)) {
-                        ++newNUnionSize;
+                        --newBudget;
                     }
                 }
-                if (newNUnionSize <= maxNUnionSize) {
-                    child.query(queryS, queryN, maxNUnionSize, newNUnionSize, out_list);
+                if (newBudget >= 0) {
+                    child.query(queryS, queryN, k, newBudget, out_list);
                 }
             }
         }
@@ -115,8 +115,9 @@ class NewTrieCompressedFurther implements SupersetDataStructure {
 
     public void collectSuperblocks(XBitSet component, XBitSet neighbours,
             ArrayList<XBitSet> list) {
-        if (neighbours.cardinality() <= targetWidth + 1) {
-            root.query(component, neighbours, targetWidth + 1, neighbours.cardinality(), list);
+        int k = targetWidth + 1 - neighbours.cardinality();
+        if (k >= 0) {
+            root.query(component, neighbours, k, k, list);
         }
     }
 

@@ -70,9 +70,9 @@ class NewTrieReordered implements SupersetDataStructure, LatexPrintable {
             return node;
         }
 
-        private void query(XBitSet queryS, XBitSet queryN, int maxNUnionSize,
-                int nUnionSize, ArrayList<XBitSet> out_list) {
-            if (queryN.unionWith(subtrieIntersectionOfNSets).cardinality() > maxNUnionSize) {
+        private void query(XBitSet queryS, XBitSet queryN, int k,
+                int budget, ArrayList<XBitSet> out_list) {
+            if (subtrieIntersectionOfNSets.subtract(queryN).cardinality() > k) {
                 return;
             }
             if (!queryS.isSubset(subtrieUnionOfSSets)) {
@@ -85,9 +85,9 @@ class NewTrieReordered implements SupersetDataStructure, LatexPrintable {
                 }
             }
             for (TrieNode child : children) {
-                int newNUnionSize = queryN.get(child.key) ? nUnionSize : nUnionSize + 1;
-                if (newNUnionSize <= maxNUnionSize) {
-                    child.query(queryS, queryN, maxNUnionSize, newNUnionSize, out_list);
+                int newBudget = queryN.get(child.key) ? budget : budget - 1;
+                if (newBudget >= 0) {
+                    child.query(queryS, queryN, k, newBudget, out_list);
                 }
             }
         }
@@ -199,8 +199,9 @@ class NewTrieReordered implements SupersetDataStructure, LatexPrintable {
 
     public void collectSuperblocks(XBitSet component, XBitSet neighbours,
             ArrayList<XBitSet> list) {
-        if (neighbours.cardinality() <= targetWidth + 1) {
-            root.query(component, neighbours, targetWidth + 1, neighbours.cardinality(), list);
+        int k = targetWidth + 1 - neighbours.cardinality();
+        if (k >= 0) {
+            root.query(component, neighbours, k, k, list);
         }
     }
 
