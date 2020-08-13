@@ -18,7 +18,7 @@ class TrieNode {
 
     void addSSet(XBitSet SSet) {
         SSets = Arrays.copyOf(SSets, SSets.length + 1);
-        SSets[SSets.length - 1] = SSet;
+        SSets[SSets.length - 1] = (XBitSet) SSet.clone();
     }
 
     TrieNode getOrAddChildNode(int key, XBitSet SSet, XBitSet NSet) {

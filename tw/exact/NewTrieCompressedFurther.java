@@ -102,7 +102,7 @@ class NewTrieCompressedFurther implements SupersetDataStructure {
             key = Arrays.copyOfRange(key, node.key.length, key.length);
         }
         node.SSets = Arrays.copyOf(node.SSets, node.SSets.length + 1);
-        node.SSets[node.SSets.length - 1] = SSet;
+        node.SSets[node.SSets.length - 1] = (XBitSet) SSet.clone();
         ++size;
     }
 
