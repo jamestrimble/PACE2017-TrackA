@@ -11,6 +11,7 @@ class NewTrieReordered implements SupersetDataStructure, LatexPrintable {
     private int[] stats;
     private ArrayList<BitsetPair> all = new ArrayList<>();
     private FrequencyComparator comparator;
+    private int reorderSize = 10;
 
     class FrequencyComparator implements Comparator<Integer> {
         int[] stats;
@@ -66,7 +67,8 @@ class NewTrieReordered implements SupersetDataStructure, LatexPrintable {
     }
 
     public void put(XBitSet SSet, XBitSet NSet) {
-        if (all.size() >= 1024 && Integer.bitCount(all.size()) == 1) {
+        if (all.size() == reorderSize) {
+            reorderSize *= 10;
             comparator = new FrequencyComparator(stats);
             XBitSet initialIntersectionOfNSets = new XBitSet();
             initialIntersectionOfNSets.set(0, stats.length);
