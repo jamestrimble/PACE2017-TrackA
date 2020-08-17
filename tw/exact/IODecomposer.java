@@ -98,6 +98,7 @@ public class IODecomposer {
       oBlockSieve = supersetDataStructureType == 0 ? new LayeredSieve(g.n, targetWidth) :
             supersetDataStructureType == 1 ? new NewTrie(g.n, targetWidth) :
             supersetDataStructureType == 2 ? new NewTrieCompressed(g.n, targetWidth) :
+            supersetDataStructureType == 3 ? new SetTrie(g.n, targetWidth) :
             supersetDataStructureType == -1 ? new NewTrieReordered(g.n, targetWidth) :
             supersetDataStructureType == -2 ? new NewTrieCompressedReordered(g.n, targetWidth) :
             null;
