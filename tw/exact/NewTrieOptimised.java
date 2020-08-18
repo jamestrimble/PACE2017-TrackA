@@ -18,8 +18,7 @@ class NewTrieOptimised implements SupersetDataStructure {
     }
 
     public void put(XBitSet SSet, XBitSet NSet) {
-        root.subtrieIntersectionOfNSets.and(NSet);
-        root.interLongs = root.subtrieIntersectionOfNSets.toLongArray();
+        root.updateIntersectionOfNSets(NSet);
         root.subtrieUnionOfSSets.or(SSet);
         TrieNodeOptimised node = root;
         // iterate over elements of NSet
@@ -41,9 +40,9 @@ class NewTrieOptimised implements SupersetDataStructure {
             ArrayList<XBitSet> list) {
         int k = targetWidth + 1 - neighbours.cardinality();
         if (k >= 0) {
-            long[] longs = neighbours.toLongArray();
-            longs = Arrays.copyOf(longs, (n+63)/64);
-            root.query(component, neighbours, longs, k, k, list);
+            long[] queryNLongs = neighbours.toLongArray();
+            queryNLongs = Arrays.copyOf(queryNLongs, (n+63)/64);
+            root.query(component, queryNLongs, k, k, list);
         }
     }
 
