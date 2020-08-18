@@ -6,8 +6,7 @@ import java.util.Arrays;
 class TrieNodeOptimised {
     private TrieNodeOptimised[] children = new TrieNodeOptimised[0];
     XBitSet subtrieUnionOfSSets;
-    XBitSet subtrieIntersectionOfNSets;
-    long[] interLongs;
+    long[] subtrieIntersectionOfNSetsLongs;
     private int key;
     private int kword;
     private long kbit;
@@ -17,14 +16,26 @@ class TrieNodeOptimised {
         this.key = key;
         this.kword = key / 64;
         this.kbit = 1L << (key % 64);
-        subtrieIntersectionOfNSets = initialIntersectionOfNSets;
-        interLongs = subtrieIntersectionOfNSets.toLongArray();
+        subtrieIntersectionOfNSetsLongs = initialIntersectionOfNSets.toLongArray();
         subtrieUnionOfSSets = new XBitSet();
     }
 
     void updateIntersectionOfNSets(XBitSet NSet) {
-        subtrieIntersectionOfNSets.and(NSet);
-        interLongs = subtrieIntersectionOfNSets.toLongArray();
+        long[] NSetLongs = NSet.toLongArray();
+        int top = Math.min(NSetLongs.length, subtrieIntersectionOfNSetsLongs.length);
+        for (int i=0; i<top; i++) {
+            if (i == subtrieIntersectionOfNSetsLongs.length) {
+                break;
+            }
+            subtrieIntersectionOfNSetsLongs[i] = subtrieIntersectionOfNSetsLongs[i] & NSetLongs[i];
+        }
+        int newLength = top;
+        while (newLength > 0 && subtrieIntersectionOfNSetsLongs[newLength-1] == 0) {
+            --newLength;
+        }
+        if (newLength < subtrieIntersectionOfNSetsLongs.length) {
+            subtrieIntersectionOfNSetsLongs = Arrays.copyOf(subtrieIntersectionOfNSetsLongs, newLength);
+        }
     }
 
     void addSSet(XBitSet SSet) {
@@ -51,8 +62,8 @@ class TrieNodeOptimised {
     void query(XBitSet queryS, long[] queryNLongs, int k,
             int budget, ArrayList<XBitSet> out_list) {
         int count = 0;
-        for (int i=0; i<interLongs.length; i++) {
-            count += Long.bitCount(interLongs[i] & ~queryNLongs[i]);
+        for (int i=0; i<subtrieIntersectionOfNSetsLongs.length; i++) {
+            count += Long.bitCount(subtrieIntersectionOfNSetsLongs[i] & ~queryNLongs[i]);
         }
         if (count > k) {
             return;
@@ -62,7 +73,16 @@ class TrieNodeOptimised {
         }
         for (XBitSet SSet : SSets) {
             if (queryS.isSubset(SSet)) {
-                out_list.add((XBitSet) subtrieIntersectionOfNSets.clone());
+                XBitSet bs = new XBitSet();
+                for (int i=0; i<subtrieIntersectionOfNSetsLongs.length; i++) {
+                    long word = subtrieIntersectionOfNSetsLongs[i];
+                    while (word != 0) {
+                        int bit = Long.numberOfTrailingZeros(word);
+                        bs.set(i * 64 + bit);
+                        word ^= (1L << bit);
+                    }
+                }
+                out_list.add(bs);
                 break;
             }
         }
