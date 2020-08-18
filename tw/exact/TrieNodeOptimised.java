@@ -87,7 +87,7 @@ class TrieNodeOptimised {
             }
         }
         for (TrieNodeOptimised child : children) {
-            int newBudget = (0 != (queryNLongs[kword] & kbit)) ? budget : budget - 1;
+            int newBudget = (0 != (queryNLongs[child.kword] & child.kbit)) ? budget : budget - 1;
             if (newBudget >= 0) {
                 child.query(queryS, queryNLongs, k, newBudget, out_list);
             }
