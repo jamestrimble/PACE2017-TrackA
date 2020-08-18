@@ -170,6 +170,8 @@ public class MainDecomposer {
         supersetDataStructureType = 2;
     } else if (args[0].equals("settrie")) {
         supersetDataStructureType = 3;
+    } else if (args[0].equals("new-optimised")) {
+        supersetDataStructureType = 4;
     } else if (args[0].equals("new-reordered")) {
         supersetDataStructureType = -1;
     } else if (args[0].equals("new2-reordered")) {
