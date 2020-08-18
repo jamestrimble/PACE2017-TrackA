@@ -44,7 +44,7 @@ class TrieNodeOptimised {
         return node;
     }
 
-    void query2(XBitSet queryS, XBitSet queryN, long[] queryNLongs, int k,
+    void query(XBitSet queryS, XBitSet queryN, long[] queryNLongs, int k,
             int budget, ArrayList<XBitSet> out_list) {
         int count = 0;
         for (int i=0; i<interLongs.length; i++) {
@@ -53,9 +53,6 @@ class TrieNodeOptimised {
         if (count > k) {
             return;
         }
-//        if (subtrieIntersectionOfNSets.subtract(queryN).cardinality() > k) {
-//            return;
-//        }
         if (!queryS.isSubset(subtrieUnionOfSSets)) {
             return;
         }
@@ -68,29 +65,7 @@ class TrieNodeOptimised {
         for (TrieNodeOptimised child : children) {
             int newBudget = (0 != (queryNLongs[kword] & kbit)) ? budget : budget - 1;
             if (newBudget >= 0) {
-                child.query2(queryS, queryN, queryNLongs, k, newBudget, out_list);
-            }
-        }
-    }
-
-    void query(XBitSet queryS, XBitSet queryN, int k,
-            int budget, ArrayList<XBitSet> out_list) {
-        if (subtrieIntersectionOfNSets.subtract(queryN).cardinality() > k) {
-            return;
-        }
-        if (!queryS.isSubset(subtrieUnionOfSSets)) {
-            return;
-        }
-        for (XBitSet SSet : SSets) {
-            if (queryS.isSubset(SSet)) {
-                out_list.add((XBitSet) subtrieIntersectionOfNSets.clone());
-                break;
-            }
-        }
-        for (TrieNodeOptimised child : children) {
-            int newBudget = queryN.get(child.key) ? budget : budget - 1;
-            if (newBudget >= 0) {
-                child.query(queryS, queryN, k, newBudget, out_list);
+                child.query(queryS, queryN, queryNLongs, k, newBudget, out_list);
             }
         }
     }

@@ -43,7 +43,7 @@ class NewTrieOptimised implements SupersetDataStructure {
         if (k >= 0) {
             long[] longs = neighbours.toLongArray();
             longs = Arrays.copyOf(longs, (n+63)/64);
-            root.query2(component, neighbours, longs, k, k, list);
+            root.query(component, neighbours, longs, k, k, list);
         }
     }
 
